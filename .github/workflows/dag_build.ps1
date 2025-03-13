@@ -13,29 +13,19 @@ mkdir '.\temp\dna-datalake-airflow\config' | Out-Null
 Write-Host "Copying DAG files..."
 Copy-Item -Path ".\DAG\*" -Destination ".\temp\dna-datalake-airflow\dag" -Recurse
 
-# Fetch Git history to avoid missing refs
-Write-Host "Fetching Git history..."
-git fetch --all --quiet
-
-# Get list of changed files
+# Get list of changed files from the last commit
 try {
-    $baseRef = git rev-parse --verify origin/Master 2>$null
-    if ($baseRef) {
-        $changedFiles = git diff --name-only origin/Master...HEAD
-        if ($changedFiles) {
-            $changedFilesList = $changedFiles -split "`n"
-            Write-Host "Changed files:"
-            $changedFilesList | ForEach-Object { Write-Host "- $_" }
-        } else {
-            Write-Host "No changed files detected."
-            $changedFilesList = @()
-        }
+    $changedFiles = git diff --name-only HEAD~1
+    if ($changedFiles) {
+        $changedFilesList = $changedFiles -split "`n"
+        Write-Host "Changed files:"
+        $changedFilesList | ForEach-Object { Write-Host "- $_" }
     } else {
-        Write-Host "Base ref 'origin/Master' not found. Skipping diff check."
+        Write-Host "No changed files detected."
         $changedFilesList = @()
     }
 } catch {
-    Write-Host "Error checking origin/Master. Skipping diff check."
+    Write-Host "Error detecting changes from the last commit. Skipping diff check."
     $changedFilesList = @()
 }
 
