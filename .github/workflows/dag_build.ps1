@@ -13,8 +13,19 @@ mkdir '.\temp\dna-datalake-airflow\config' | Out-Null
 Write-Host "Copying DAG files..."
 Copy-Item -Path ".\DAG\*" -Destination ".\temp\dna-datalake-airflow\dag" -Recurse
 
-# Check for changes in requirements.txt
-$changedFiles = git diff --name-only origin/Master...HEAD
+# Fetch Git history to avoid missing refs
+Write-Host "Fetching Git history..."
+git fetch --all --quiet
+
+# Check if origin/Master exists
+$baseRef = (git rev-parse --verify origin/Master) 2>$null
+if ($baseRef) {
+    $changedFiles = git diff --name-only origin/Master...HEAD
+} else {
+    Write-Host "Base ref 'origin/Master' not found. Skipping diff check."
+    $changedFiles = @()
+}
+
 Write-Host "Changed files: $changedFiles"
 
 # Always copy other config files
