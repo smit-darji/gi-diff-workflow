@@ -1,9 +1,39 @@
+# Define folder paths
 $FolderName = ".\temp"
 if (Test-Path $FolderName) {
     Write-Host "Folder Exists"
-    Remove-Item $FolderName  -Recurse -Force
+    Remove-Item $FolderName -Recurse -Force
 }
-mkdir '.\temp\dna-datalake-airflow\dag'
-mkdir '.\temp\dna-datalake-airflow\config'
+
+# Create required directories
+mkdir '.\temp\dna-datalake-airflow\dag' | Out-Null
+mkdir '.\temp\dna-datalake-airflow\config' | Out-Null
+
+# Copy all DAG files (unconditionally)
+Write-Host "Copying DAG files..."
 Copy-Item -Path ".\DAG\*" -Destination ".\temp\dna-datalake-airflow\dag" -Recurse
-Copy-Item -Path ".\config\*" -Destination ".\temp\dna-datalake-airflow\config" -Recurse
+
+# Check for changes in requirements.txt
+$changedFiles = git diff --name-only origin/main...HEAD
+Write-Host "Changed files: $changedFiles"
+
+# Always copy other config files
+Write-Host "Copying other config files..."
+Get-ChildItem -Path ".\config" | ForEach-Object {
+    $fileName = $_.Name
+    if ($fileName -eq "requirements.txt") {
+        # Only copy if changed
+        if ($changedFiles -contains "config/requirements.txt") {
+            Write-Host "Copying changed requirements.txt"
+            Copy-Item -Path ".\config\requirements.txt" -Destination ".\temp\dna-datalake-airflow\config" -Force
+        } else {
+            Write-Host "Skipping requirements.txt (no changes)"
+        }
+    } else {
+        # Always copy other files
+        Write-Host "Copying $fileName"
+        Copy-Item -Path ".\config\$fileName" -Destination ".\temp\dna-datalake-airflow\config" -Force
+    }
+}
+
+Write-Host "Build completed!"
