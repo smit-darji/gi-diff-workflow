@@ -29,7 +29,7 @@ jobs:
       - name: Detect Added Files
         id: set-added-files
         run: |
-          added_files=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.event.pull_request.base.ref }} HEAD | uniq | grep "^DAG/.*\.py$" || true)
+          added_files=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.event.pull_request.base.ref }} HEAD | uniq || true)
           echo "Added Files:"
           echo "$added_files"
           echo "ADDED_FILES=$(echo "$added_files" | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_ENV
