@@ -34,20 +34,6 @@ jobs:
             echo "FILE_MODIFIED=false" >> $GITHUB_ENV
           fi
         shell: bash
-            
-      - name: Get main branch
-        run: |
-          git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
-        shell: bash
-      
-      - name: Detect Added Files
-        id: set-added-files
-        run: |
-          added_files=$(git diff --name-only --diff-filter=M origin/${{ github.event.pull_request.base.ref }} HEAD | uniq || true)
-          echo "Added Files:"
-          echo "$added_files"
-          echo "ADDED_FILES=$(echo "$added_files" | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_ENV
-        shell: bash
 
       - name: Zip Lambda Function
         run: .github\workflows\dag_build.ps1
