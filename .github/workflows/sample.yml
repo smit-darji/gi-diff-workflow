@@ -31,6 +31,7 @@ jobs:
           cd ./temp/dna-datalake-airflow/config
           ls 
           echo "======================================="
+          cd ../../..
           cd ./temp/dna-datalake-airflow/DAG
           ls 
       # - name: Upload DAG to S3
