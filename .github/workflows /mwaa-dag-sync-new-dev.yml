@@ -2,7 +2,7 @@ name: Dev - New Sync Airflow DAG to S3
 on:
   pull_request:
     branches:
-      - main
+      - Master
   workflow_dispatch:
 
 permissions:
