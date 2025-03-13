@@ -17,13 +17,13 @@ Copy-Item -Path ".\DAG\*" -Destination ".\temp\dna-datalake-airflow\dag" -Recurs
 Write-Host "Fetching Git history..."
 git fetch --all --quiet
 
-# Check if origin/Master exists without failing on error
+# Get list of changed files
 try {
     $baseRef = git rev-parse --verify origin/Master 2>$null
     if ($baseRef) {
         $changedFiles = git diff --name-only origin/Master...HEAD
         if ($changedFiles) {
-            $changedFilesList = $changedFiles -split "`n"  # Split into an array
+            $changedFilesList = $changedFiles -split "`n"
             Write-Host "Changed files:"
             $changedFilesList | ForEach-Object { Write-Host "- $_" }
         } else {
@@ -44,7 +44,6 @@ Write-Host "Copying other config files..."
 Get-ChildItem -Path ".\config" | ForEach-Object {
     $fileName = $_.Name
     if ($fileName -eq "requirements.txt") {
-        # Only copy if changed
         if ($changedFilesList -contains "config/requirements.txt") {
             Write-Host "Copying changed requirements.txt"
             Copy-Item -Path ".\config\requirements.txt" -Destination ".\temp\dna-datalake-airflow\config" -Force
@@ -52,7 +51,7 @@ Get-ChildItem -Path ".\config" | ForEach-Object {
             Write-Host "Skipping requirements.txt (no changes)"
         }
     } else {
-        # Always copy other files
+        # Always copy other config files
         Write-Host "Copying $fileName"
         Copy-Item -Path ".\config\$fileName" -Destination ".\temp\dna-datalake-airflow\config" -Force
     }
