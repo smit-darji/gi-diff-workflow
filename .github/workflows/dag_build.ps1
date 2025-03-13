@@ -10,3 +10,6 @@ mkdir '.\temp\dna-datalake-airflow\config' -Force
 
 # Read changed files
 $changedFiles = Get-Content ".\changed_files.txt"
+
+Write-Host "Changed Files:"
+$changedFiles | ForEach-Object { Write-Host $_ }
