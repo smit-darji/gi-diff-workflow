@@ -36,10 +36,3 @@ jobs:
       - name: Upload DAG to S3
         run: |
           aws s3 cp ./temp s3://test-github-actionbucket/ --recursive
-
-
-
-
-
-
-          
