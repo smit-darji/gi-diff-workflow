@@ -28,7 +28,7 @@ foreach ($file in $configFiles) {
         Write-Host "Skipping unmodified file: $($file.Name)"
         continue
     }
-    Write-Host "Copying file: $($file.Name)"
+    # Write-Host "Copying file: $($file.Name)"
     Copy-Item -Path $file.FullName -Destination ".\temp\dna-datalake-airflow\config"
 }
 
