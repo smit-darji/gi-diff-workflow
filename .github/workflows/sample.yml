@@ -1,34 +1,42 @@
-name: Python Package using Conda
+name: Dev - New Sync Airflow DAG to S3
+on:
+  pull_request:
+    branches:
+      - Master
+  workflow_dispatch:
 
-on: [push]
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-
+  dev-deploy:
+    runs-on: windows-latest
+    environment:
+      name: Dev
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'
-    - name: Add conda to system path
-      run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-    - name: Install dependencies
-      run: |
-        conda env update --file environment.yml --name base
-    - name: Lint with flake8
-      run: |
-        conda install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        conda install pytest
-        pytest
+      - name: Clone Repo
+        uses: actions/checkout@v4
+      - name: Zip Lambda Function
+        run: .github\workflows\dag_build.ps1
+        shell: powershell
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     audience: sts.amazonaws.com
+      #     aws-region: ap-south-1
+      #     role-to-assume: arn:aws:iam::160885270668:role/demo_role
+      - name: prit temp file list
+        run: |
+          cd ./temp/dna-datalake-airflow/config
+          ls 
+          echo "======================================="
+          cd ../../..
+          cd ./temp/dna-datalake-airflow/DAG
+          ls 
+      - name: Upload DAG to S3
+        run: |
+          cat ./temp/dna-datalake-airflow/config/requirements_2.7.2.txt
+      # - name: Upload DAG to S3
+      #   run: |
+      #     aws s3 cp ./temp s3://test-github-actionbucket/ --recursive
