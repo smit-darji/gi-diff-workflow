@@ -22,14 +22,21 @@ try {
     $baseRef = git rev-parse --verify origin/Master 2>$null
     if ($baseRef) {
         $changedFiles = git diff --name-only origin/Master...HEAD
-        Write-Host "Changed files: $changedFiles"
+        if ($changedFiles) {
+            $changedFilesList = $changedFiles -split "`n"  # Split into an array
+            Write-Host "Changed files:"
+            $changedFilesList | ForEach-Object { Write-Host "- $_" }
+        } else {
+            Write-Host "No changed files detected."
+            $changedFilesList = @()
+        }
     } else {
         Write-Host "Base ref 'origin/Master' not found. Skipping diff check."
-        $changedFiles = @()
+        $changedFilesList = @()
     }
 } catch {
     Write-Host "Error checking origin/Master. Skipping diff check."
-    $changedFiles = @()
+    $changedFilesList = @()
 }
 
 # Always copy other config files
@@ -38,7 +45,7 @@ Get-ChildItem -Path ".\config" | ForEach-Object {
     $fileName = $_.Name
     if ($fileName -eq "requirements.txt") {
         # Only copy if changed
-        if ($changedFiles -contains "config/requirements.txt") {
+        if ($changedFilesList -contains "config/requirements.txt") {
             Write-Host "Copying changed requirements.txt"
             Copy-Item -Path ".\config\requirements.txt" -Destination ".\temp\dna-datalake-airflow\config" -Force
         } else {
