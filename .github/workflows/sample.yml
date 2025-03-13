@@ -17,10 +17,18 @@ jobs:
     steps:
       - name: Clone Repo
         uses: actions/checkout@v4
-        
+
       - name: Zip Lambda Function
         run: .github\workflows\dag_build.ps1
         shell: powershell
+      - name: Detect Changed Files
+        id: changed-files
+        run: |
+          git diff --name-only HEAD^ HEAD > changed_files.txt
+          echo "Changed Files:"
+          cat changed_files.txt
+          echo "CHANGED_FILES=$(cat changed_files.txt)" >> $GITHUB_ENV
+        shell: bash
       # - name: Configure AWS credentials
       #   uses: aws-actions/configure-aws-credentials@v4
       #   with:
