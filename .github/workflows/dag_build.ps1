@@ -14,7 +14,7 @@ Write-Host "Copying DAG files..."
 Copy-Item -Path ".\DAG\*" -Destination ".\temp\dna-datalake-airflow\dag" -Recurse
 
 # Check for changes in requirements.txt
-$changedFiles = git diff --name-only origin/main...HEAD
+$changedFiles = git diff --name-only origin/Master...HEAD
 Write-Host "Changed files: $changedFiles"
 
 # Always copy other config files
