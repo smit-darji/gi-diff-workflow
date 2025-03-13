@@ -17,16 +17,20 @@ Copy-Item -Path ".\DAG\*" -Destination ".\temp\dna-datalake-airflow\dag" -Recurs
 Write-Host "Fetching Git history..."
 git fetch --all --quiet
 
-# Check if origin/Master exists
-$baseRef = (git rev-parse --verify origin/Master) 2>$null
-if ($baseRef) {
-    $changedFiles = git diff --name-only origin/Master...HEAD
-} else {
-    Write-Host "Base ref 'origin/Master' not found. Skipping diff check."
+# Check if origin/Master exists without failing on error
+try {
+    $baseRef = git rev-parse --verify origin/Master 2>$null
+    if ($baseRef) {
+        $changedFiles = git diff --name-only origin/Master...HEAD
+        Write-Host "Changed files: $changedFiles"
+    } else {
+        Write-Host "Base ref 'origin/Master' not found. Skipping diff check."
+        $changedFiles = @()
+    }
+} catch {
+    Write-Host "Error checking origin/Master. Skipping diff check."
     $changedFiles = @()
 }
-
-Write-Host "Changed files: $changedFiles"
 
 # Always copy other config files
 Write-Host "Copying other config files..."
@@ -47,4 +51,4 @@ Get-ChildItem -Path ".\config" | ForEach-Object {
     }
 }
 
-Write-Host "Build completed!"
+Write-Host "✅ Build completed!"
