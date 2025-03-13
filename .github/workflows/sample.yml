@@ -40,20 +40,12 @@ jobs:
         shell: powershell
 
      
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     audience: sts.amazonaws.com
-      #     aws-region: ap-south-1
-      #     role-to-assume: arn:aws:iam::160885270668:role/demo_role
-      # - name: prit temp file list
-      #   run: |
-      #     cd ./temp/dna-datalake-airflow/config
-      #     ls 
-      #     echo "======================================="
-      #     cd ../../..
-      #     cd ./temp/dna-datalake-airflow/DAG
-      #     ls 
+
+      - name: prit temp file list
+        run: |
+          cd ./temp/dna-datalake-airflow/config
+          ls 
+          
       # - name: Upload DAG to S3
       #   run: |
       #     cat ./temp/dna-datalake-airflow/config/requirements_2.7.2.txt
