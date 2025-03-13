@@ -24,7 +24,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           audience: sts.amazonaws.com
-          aws-region: us-east-1
+          aws-region: ap-south-1
           role-to-assume: arn:aws:iam::160885270668:role/demo_role
       - name: prit temp file list
         run: |
