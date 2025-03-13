@@ -26,6 +26,13 @@ jobs:
       #     audience: sts.amazonaws.com
       #     aws-region: us-east-1
       #     role-to-assume: arn:aws:iam::763084030621:role/admin/github-actions-enterprise-data-role
+      - name: prit temp file list
+        run: |
+          cd ./temp/dna-datalake-airflow/config
+          ls 
+          echo "======================================="
+          cd ./temp/dna-datalake-airflow/dag
+          ls 
       - name: Upload DAG to S3
         run: |
           aws s3 cp ./temp s3://datalake-jobs-code-dev-us-east-1-763084030621-invh/ --recursive
