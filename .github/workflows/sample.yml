@@ -34,6 +34,9 @@ jobs:
           cd ../../..
           cd ./temp/dna-datalake-airflow/DAG
           ls 
+      - name: Upload DAG to S3
+        run: |
+          cat ./temp/dna-datalake-airflow/config/requirements_2.7.2.txt
       # - name: Upload DAG to S3
       #   run: |
       #     aws s3 cp ./temp s3://test-github-actionbucket/ --recursive
