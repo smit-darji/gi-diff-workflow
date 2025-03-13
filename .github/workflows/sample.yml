@@ -17,10 +17,8 @@ jobs:
     steps:
       - name: Clone Repo
         uses: actions/checkout@v4
-
-      - name: Zip Lambda Function
-        run: .github\workflows\dag_build.ps1
-        shell: powershell
+      
+      
       - name: Get main branch
         run: |
           git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
@@ -34,6 +32,12 @@ jobs:
           echo "$added_files"
           echo "ADDED_FILES=$(echo "$added_files" | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_ENV
         shell: bash
+
+      - name: Zip Lambda Function
+        run: .github\workflows\dag_build.ps1
+        shell: powershell
+
+     
       # - name: Configure AWS credentials
       #   uses: aws-actions/configure-aws-credentials@v4
       #   with:
