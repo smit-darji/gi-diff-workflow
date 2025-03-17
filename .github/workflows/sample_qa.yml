@@ -1,0 +1,77 @@
+name: QA - New Sync Airflow DAG to S3
+on:
+  push:
+    tags:
+      - qa*
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  QA-deploy:
+    runs-on: windows-latest
+    environment:
+      name: QA
+    steps:
+      - name: Clone Repo
+        uses: actions/checkout@v4
+      
+      - name: Get the last two tags
+        id: get_tags
+        shell: bash
+        run: |
+          # Fetch all tags to ensure they're available
+          git fetch --tags --force
+
+          # Get the latest two tags
+          LAST_TWO_TAGS=$(git tag --sort=-v:refname | head -n 2)
+
+          echo "==================="
+          echo "$LAST_TWO_TAGS"
+          echo "==================="
+
+          CURRENT_TAG=$(echo "$LAST_TWO_TAGS" | head -n 1)
+          PREV_TAG=$(echo "$LAST_TWO_TAGS" | tail -n 1)
+
+          echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_ENV
+          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_ENV
+
+          echo "New Tag is : $CURRENT_TAG"
+          echo "Previous Tag is : $PREV_TAG"
+
+      - name: Check if config/requirements_2.7.2.txt is modified
+        id: check-file-modified
+        run: |
+          if [[ -n "${{ env.PREV_TAG }}" ]]; then
+            if git diff --name-only ${{ env.PREV_TAG }} ${{ env.CURRENT_TAG }} -- 'config/requirements_2.7.2.txt' | grep -q 'config/requirements_2.7.2.txt'; then
+              echo "File config/requirements_2.7.2.txt is modified"
+              echo "FILE_MODIFIED=true" >> $GITHUB_ENV
+            else
+              echo "File config/requirements_2.7.2.txt is not modified"
+              echo "FILE_MODIFIED=false" >> $GITHUB_ENV
+            fi
+          else
+            echo "No previous tag to compare"
+            echo "FILE_MODIFIED=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Zip Lambda Function
+        run: .github\workflows\dag_build.ps1
+        shell: powershell
+
+     
+
+      - name: prit temp file list
+        run: |
+          cd ./temp/dna-datalake-airflow/config
+          ls 
+          
+      # - name: Upload DAG to S3
+      #   run: |
+      #     cat ./temp/dna-datalake-airflow/config/requirements_2.7.2.txt
+      # - name: Upload DAG to S3
+      #   run: |
+      #     aws s3 cp ./temp s3://test-github-actionbucket/ --recursive
