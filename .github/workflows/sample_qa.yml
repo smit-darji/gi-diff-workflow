@@ -21,22 +21,32 @@ jobs:
       - name: Get Previous and Current Tag
         id: get-tags
         run: |
-          CURRENT_TAG=$(git describe --tags --abbrev=0)
-          PREV_TAG=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))
-          echo "Current tag: $CURRENT_TAG"
-          echo "Previous tag: $PREV_TAG"
-          echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_ENV
-          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_ENV
+          TAGS=($(git tag --sort=-creatordate))  # List tags in reverse chronological order
+          if [[ ${#TAGS[@]} -lt 2 ]]; then
+            echo "Not enough tags for comparison"
+            echo "PREV_TAG=" >> $GITHUB_ENV
+            echo "CURRENT_TAG=${TAGS[0]}" >> $GITHUB_ENV
+          else
+            echo "Current tag: ${TAGS[0]}"
+            echo "Previous tag: ${TAGS[1]}"
+            echo "CURRENT_TAG=${TAGS[0]}" >> $GITHUB_ENV
+            echo "PREV_TAG=${TAGS[1]}" >> $GITHUB_ENV
+          fi
         shell: bash
 
       - name: Check if config/requirements_2.7.2.txt is modified
         id: check-file-modified
         run: |
-          if git diff --name-only ${{ env.PREV_TAG }} ${{ env.CURRENT_TAG }} -- 'config/requirements_2.7.2.txt' | grep -q 'config/requirements_2.7.2.txt'; then
-            echo "File config/requirements_2.7.2.txt is modified"
-            echo "FILE_MODIFIED=true" >> $GITHUB_ENV
+          if [[ -n "${{ env.PREV_TAG }}" ]]; then
+            if git diff --name-only ${{ env.PREV_TAG }} ${{ env.CURRENT_TAG }} -- 'config/requirements_2.7.2.txt' | grep -q 'config/requirements_2.7.2.txt'; then
+              echo "File config/requirements_2.7.2.txt is modified"
+              echo "FILE_MODIFIED=true" >> $GITHUB_ENV
+            else
+              echo "File config/requirements_2.7.2.txt is not modified"
+              echo "FILE_MODIFIED=false" >> $GITHUB_ENV
+            fi
           else
-            echo "File config/requirements_2.7.2.txt is not modified"
+            echo "No previous tag to compare"
             echo "FILE_MODIFIED=false" >> $GITHUB_ENV
           fi
         shell: bash
