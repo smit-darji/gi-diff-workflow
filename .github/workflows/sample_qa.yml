@@ -22,15 +22,22 @@ jobs:
         id: get_tags
         shell: bash
         run: |
-          LAST_TWO_TAGS=$(git tag --sort=-creatordate | head -n 2)
-      
+          # Fetch all tags to ensure they're available
+          git fetch --tags
+
+          # Get the latest two tags
+          LAST_TWO_TAGS=$(git tag --sort=-v:refname | head -n 2)
+
           echo "==================="
           echo "$LAST_TWO_TAGS"
           echo "==================="
+
           CURRENT_TAG=$(echo "$LAST_TWO_TAGS" | head -n 1)
           PREV_TAG=$(echo "$LAST_TWO_TAGS" | tail -n 1)
+
           echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_ENV
           echo "PREV_TAG=$PREV_TAG" >> $GITHUB_ENV
+
           echo "New Tag is : $CURRENT_TAG"
           echo "Previous Tag is : $PREV_TAG"
 
