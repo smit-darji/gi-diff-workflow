@@ -18,21 +18,30 @@ jobs:
       - name: Clone Repo
         uses: actions/checkout@v4
       
-      - name: Get Previous and Current Tag
-        id: get-tags
+      - name: Delete local tag if it exists
         run: |
-          TAGS=($(git tag --sort=-creatordate))  # List tags in reverse chronological order
-          if [[ ${#TAGS[@]} -lt 2 ]]; then
-            echo "Not enough tags for comparison"
-            echo "PREV_TAG=" >> $GITHUB_ENV
-            echo "CURRENT_TAG=${TAGS[0]}" >> $GITHUB_ENV
-          else
-            echo "Current tag: ${TAGS[0]}"
-            echo "Previous tag: ${TAGS[1]}"
-            echo "CURRENT_TAG=${TAGS[0]}" >> $GITHUB_ENV
-            echo "PREV_TAG=${TAGS[1]}" >> $GITHUB_ENV
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          if git show-ref --tags | grep -q "refs/tags/$TAG_NAME$"; then
+            git tag -d $TAG_NAME
           fi
-        shell: bash
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Get the last two tags
+        id: get_tags
+        run: |
+          LAST_TWO_TAGS=$(git tag --sort=-creatordate | head -n 2)
+
+          echo "==================="
+          echo "$LAST_TWO_TAGS"
+          echo "==================="
+          CURRENT_TAG=$(echo "$LAST_TWO_TAGS" | head -n 1)
+          PREV_TAG=$(echo "$LAST_TWO_TAGS" | tail -n 1)
+          echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_ENV
+          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_ENV
+          echo "New Tag is : $CURRENT_TAG"
+          echo  "Previous Tag is : $PREV_TAG"
 
       - name: Check if config/requirements_2.7.2.txt is modified
         id: check-file-modified
