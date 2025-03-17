@@ -1,0 +1,54 @@
+name: Dev - New Sync Airflow DAG to S3
+on:
+  push:
+    tags:
+      - qa*
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  dev-deploy:
+    runs-on: windows-latest
+    environment:
+      name: Dev
+    steps:
+      - name: Clone Repo
+        uses: actions/checkout@v4
+      
+      - name: Get main branch
+        run: |
+          git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
+        shell: bash
+
+      - name: Check if config/requirements_2.7.2.txt is modified
+        id: check-file-modified
+        run: |
+          if git diff --name-only --diff-filter=M origin/${{ github.event.pull_request.base.ref }} HEAD -- 'config/requirements_2.7.2.txt' | grep -q 'config/requirements_2.7.2.txt'; then
+            echo "File config/requirements_2.7.2.txt is modified"
+            echo "FILE_MODIFIED=true" >> $GITHUB_ENV
+          else
+            echo "File config/requirements_2.7.2.txt is not modified"
+            echo "FILE_MODIFIED=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Zip Lambda Function
+        run: .github\workflows\dag_build.ps1
+        shell: powershell
+
+     
+
+      - name: prit temp file list
+        run: |
+          cd ./temp/dna-datalake-airflow/config
+          ls 
+          
+      # - name: Upload DAG to S3
+      #   run: |
+      #     cat ./temp/dna-datalake-airflow/config/requirements_2.7.2.txt
+      # - name: Upload DAG to S3
+      #   run: |
+      #     aws s3 cp ./temp s3://test-github-actionbucket/ --recursive
