@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           # Fetch all tags to ensure they're available
-          git fetch --tags
+          git fetch --tags --force
 
           # Get the latest two tags
           LAST_TWO_TAGS=$(git tag --sort=-v:refname | head -n 2)
