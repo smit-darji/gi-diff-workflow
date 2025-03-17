@@ -18,13 +18,6 @@ jobs:
       - name: Clone Repo
         uses: actions/checkout@v4
       
-      - name: Delete local tag if it exists
-        run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          if git show-ref --tags | grep -q "refs/tags/$TAG_NAME$"; then
-            git tag -d $TAG_NAME
-          fi
-
       - name: Fetch all tags
         run: git fetch --tags
 
