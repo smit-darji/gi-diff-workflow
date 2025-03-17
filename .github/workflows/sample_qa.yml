@@ -20,9 +20,10 @@ jobs:
       
       - name: Get the last two tags
         id: get_tags
+        shell: bash
         run: |
           LAST_TWO_TAGS=$(git tag --sort=-creatordate | head -n 2)
-
+      
           echo "==================="
           echo "$LAST_TWO_TAGS"
           echo "==================="
@@ -31,7 +32,7 @@ jobs:
           echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_ENV
           echo "PREV_TAG=$PREV_TAG" >> $GITHUB_ENV
           echo "New Tag is : $CURRENT_TAG"
-          echo  "Previous Tag is : $PREV_TAG"
+          echo "Previous Tag is : $PREV_TAG"
 
       - name: Check if config/requirements_2.7.2.txt is modified
         id: check-file-modified
